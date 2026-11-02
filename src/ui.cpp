@@ -36,7 +36,11 @@ std::wstring formatInt(int v) { return std::to_wstring(v); }
 
 App::App() = default;
 App::~App() {
+    // Release GDI+ objects before the font family and the GDI+ runtime itself.
+    fonts_.clear();
+    backBuffer_.reset();
     if (family_) delete family_;
+    family_ = nullptr;
     if (iconLarge_) DestroyIcon(iconLarge_);
     if (iconSmall_) DestroyIcon(iconSmall_);
     if (gdiplusToken_) GdiplusShutdown(gdiplusToken_);
@@ -176,7 +180,9 @@ void App::applyTheme() {
 
     if (hwnd_) {
         BOOL darkFrame = dark_ ? TRUE : FALSE;
-        DwmSetWindowAttribute(hwnd_, 20 /*DWMWA_USE_IMMERSIVE_DARK_MODE*/, &darkFrame, sizeof(darkFrame));
+        // 20 is DWMWA_USE_IMMERSIVE_DARK_MODE on Windows 10 20H1+/11, 19 on 1809/1909.
+        if (FAILED(DwmSetWindowAttribute(hwnd_, 20, &darkFrame, sizeof(darkFrame))))
+            DwmSetWindowAttribute(hwnd_, 19, &darkFrame, sizeof(darkFrame));
         DWORD border = scheme_.outlineVariant;
         DwmSetWindowAttribute(hwnd_, 34 /*DWMWA_BORDER_COLOR*/, &border, sizeof(border));
         DWORD corner = 2;  // DWMWCP_ROUND
@@ -242,7 +248,6 @@ void App::closeConfirm() {
 void App::setPage(Page page) {
     page_ = page;
     scroll_ = 0;
-    searchFocused_ = false;
     InvalidateRect(hwnd_, nullptr, FALSE);
 }
 
@@ -348,8 +353,6 @@ void App::onMouseMove(float x, float y) {
     }
     if (action == A_None) {
         SetCursor(LoadCursorW(nullptr, IDC_ARROW));
-    } else if (action == A_SearchFocus) {
-        SetCursor(LoadCursorW(nullptr, IDC_IBEAM));
     } else {
         SetCursor(LoadCursorW(nullptr, IDC_HAND));
     }
@@ -378,7 +381,6 @@ void App::onMouseDown(float x, float y) {
         break;
     }
     if (pressAction_ == A_None && confirmVisible_) return;
-    if (pressAction_ != A_SearchFocus) searchFocused_ = false;
     InvalidateRect(hwnd_, nullptr, FALSE);
 }
 
@@ -411,33 +413,9 @@ void App::onMouseWheel(int delta) {
     InvalidateRect(hwnd_, nullptr, FALSE);
 }
 
-void App::onChar(wchar_t ch) {
-    if (!searchFocused_) return;
-    if (ch == 8) {
-        if (!search_.empty()) search_.pop_back();
-        scroll_ = 0;
-        InvalidateRect(hwnd_, nullptr, FALSE);
-    } else if (ch >= 32) {
-        if (search_.size() < 40) search_.push_back(ch);
-        scroll_ = 0;
-        InvalidateRect(hwnd_, nullptr, FALSE);
-    }
-}
-
 void App::onKeyDown(int vk) {
     if (confirmVisible_) {
         if (vk == VK_ESCAPE) closeConfirm();
-        return;
-    }
-    if (vk == VK_ESCAPE && searchFocused_) {
-        searchFocused_ = false;
-        if (!search_.empty()) search_.clear();
-        InvalidateRect(hwnd_, nullptr, FALSE);
-        return;
-    }
-    if (searchFocused_ && vk == VK_BACK) {
-        if (!search_.empty()) search_.pop_back();
-        InvalidateRect(hwnd_, nullptr, FALSE);
         return;
     }
     if (page_ == Page::Items) {
@@ -648,10 +626,6 @@ void App::invoke(const Hotspot& spot) {
             InvalidateRect(hwnd_, nullptr, FALSE);
             break;
         }
-        case A_SearchFocus:
-            searchFocused_ = true;
-            InvalidateRect(hwnd_, nullptr, FALSE);
-            break;
         case A_Minimize:
             ShowWindow(hwnd_, SW_MINIMIZE);
             break;
@@ -751,12 +725,10 @@ LRESULT App::proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
             onMouseUp(GET_X_LPARAM(lp) / scale_, GET_Y_LPARAM(lp) / scale_);
             return 0;
         case WM_SETCURSOR:
-            return TRUE;
+            if (LOWORD(lp) == HTCLIENT) return TRUE;  // cursor set in our mouse tracking
+            break;
         case WM_MOUSEWHEEL:
             onMouseWheel(GET_WHEEL_DELTA_WPARAM(wp));
-            return 0;
-        case WM_CHAR:
-            onChar((wchar_t)wp);
             return 0;
         case WM_KEYDOWN:
             onKeyDown((int)wp);

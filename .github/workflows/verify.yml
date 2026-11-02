@@ -1,0 +1,42 @@
+name: verify
+
+# Runs the real executable on a Windows runner, drives it with clicks,
+# checks that a toggle writes the registry and refreshes docs/screenshots.
+on:
+  workflow_dispatch:
+
+jobs:
+  screenshots:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Zig
+        uses: mlugg/setup-zig@v1
+        with:
+          version: 0.17.0
+
+      - name: Build
+        shell: bash
+        run: ZIG=zig ./build/build.sh
+
+      - name: Launch, click and capture
+        shell: pwsh
+        run: ./tools/capture.ps1
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: docs/screenshots
+
+      - name: Commit screenshots
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/screenshots
+          git diff --cached --quiet || git commit -m "docs: refresh screenshots"
+          git push

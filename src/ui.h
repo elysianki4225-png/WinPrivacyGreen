@@ -48,7 +48,6 @@ enum ActionId {
     A_RestoreAll,
     A_OpenUrl,
     A_Lang,
-    A_SearchFocus,
     A_Minimize,
     A_Close,
     A_ConfirmOk,
@@ -156,9 +155,6 @@ private:
     Page page_ = Page::Overview;
     float scroll_ = 0;
     float maxScroll_ = 0;
-    std::wstring search_;
-    bool searchFocused_ = false;
-    int searching_ = 0;  // reserved
 
     std::vector<Hotspot> hotspots_;
     std::vector<Hotspot> hitAreas_;

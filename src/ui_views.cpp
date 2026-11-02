@@ -2,7 +2,6 @@
 #include <gdiplus.h>
 
 #include <algorithm>
-#include <cwctype>
 #include <string>
 #include <vector>
 
@@ -19,15 +18,6 @@ namespace {
 
 const wchar_t* kVersion = L"1.0.0";
 const wchar_t* kProjectUrl = L"https://github.com/elysianki4225-png/WinPrivacyGreen";
-
-std::wstring lowerCase(std::wstring s) {
-    for (auto& c : s) c = (wchar_t)towlower(c);
-    return s;
-}
-
-bool containsCi(const std::wstring& hay, const std::wstring& needle) {
-    return lowerCase(hay).find(lowerCase(needle)) != std::wstring::npos;
-}
 
 void cardBg(Graphics& g, const RectF& r, const Scheme& s) {
     fillRound(g, r, 20, s.surfaceContainerLow);
@@ -208,23 +198,18 @@ void App::drawOverview(Graphics& g, const RectF& view) {
 
 // ---------------------------------------------------------------------------
 void App::drawItemsPage(Graphics& g, const RectF& view) {
-    Font* bodyFont = font(13, false);
     Font* smallFont = font(12, false);
 
     // ---- toolbar
-    RectF searchRect(view.X, view.Y, 300, 40);
-    fillRound(g, searchRect, 20, scheme_.surfaceContainerHigh);
-    drawIcon(g, IconKind::Search, RectF(searchRect.X + 14, searchRect.Y + 11, 18, 18),
-             searchFocused_ ? scheme_.primary : scheme_.onSurfaceVariant, 1.9f);
-    std::wstring shown = search_.empty() ? tr(L"搜索设置项", L"Search settings") : search_;
-    drawText(g, shown, RectF(searchRect.X + 42, searchRect.Y, 232, 40), bodyFont,
-             search_.empty() ? scheme_.onSurfaceVariant : scheme_.onSurface);
-    if (searchFocused_) {
-        float caret = searchRect.X + 42 + textWidth(g, search_, bodyFont) + 1;
-        SolidBrush caretBrush(col(scheme_.primary));
-        g.FillRectangle(&caretBrush, RectF(caret, searchRect.Y + 11, 1.6f, 18));
+    int availableCount = 0, blockedCount = 0;
+    for (const auto& state : states_) {
+        if (!state.available) continue;
+        ++availableCount;
+        if (state.blocked) ++blockedCount;
     }
-    addHotspot(searchRect, A_SearchFocus);
+    drawText(g, tr(L"共 ", L"") + std::to_wstring(availableCount) + tr(L" 项可用 · 已屏蔽 ", L" available · blocked ") +
+                    std::to_wstring(blockedCount) + tr(L" 项", L""),
+             RectF(view.X + 4, view.Y, 320, 40), smallFont, scheme_.onSurfaceVariant);
 
     RectF backupSwitch(view.GetRight() - 46, view.Y + 8, 44, 24);
     drawText(g, tr(L"修改前备份", L"Back up before changes"),
@@ -243,37 +228,28 @@ void App::drawItemsPage(Graphics& g, const RectF& view) {
     g.SetClip(RectF(view.X - 8, view.Y + 48, view.Width + 16, view.Height - 48));
 
     const auto& catalog = itemCatalog();
-    std::vector<size_t> matches;
-    for (size_t i = 0; i < catalog.size(); ++i) {
-        const ItemDef& def = catalog[i];
-        std::wstring title = chinese_ ? def.zhTitle : def.enTitle;
-        std::wstring desc = chinese_ ? def.zhDesc : def.enDesc;
-        if (!search_.empty() && !containsCi(title, search_) && !containsCi(desc, search_)) continue;
-        matches.push_back(i);
-    }
 
-    bool any = false;
     for (int group = 0; group < (int)ItemGroup::Count; ++group) {
         std::vector<size_t> groupItems;
-        for (size_t idx : matches)
+        for (size_t idx = 0; idx < catalog.size(); ++idx)
             if ((int)catalog[idx].group == group) groupItems.push_back(idx);
         if (groupItems.empty()) continue;
-        any = true;
 
-        int blockedCount = 0;
+        int groupBlocked = 0;
         for (size_t idx : groupItems)
-            if (states_[idx].blocked) ++blockedCount;
+            if (states_[idx].blocked) ++groupBlocked;
 
         if (drawY + 30 > view.Y && drawY < view.GetBottom()) {
             drawText(g, groupTitle((ItemGroup)group, chinese_), RectF(view.X + 4, drawY, 320, 26), font(12, true),
                      scheme_.primary);
-            std::wstring counter = std::to_wstring(blockedCount) + L" / " + std::to_wstring(groupItems.size());
+            std::wstring counter = std::to_wstring(groupBlocked) + L" / " + std::to_wstring(groupItems.size());
             drawText(g, counter, RectF(view.GetRight() - 120, drawY, 92, 26), font(11, false), scheme_.onSurfaceVariant,
                      TextAlign::Right);
         }
         drawY += 34;
 
         for (size_t idx : groupItems) {
+            if (idx >= states_.size()) continue;
             const ItemDef& def = catalog[idx];
             RectF row(view.X, drawY, view.Width - 8, 72);
             bool available = states_[idx].available;
@@ -321,19 +297,9 @@ void App::drawItemsPage(Graphics& g, const RectF& view) {
 
     g.Restore(clipState);
 
-    if (!any) {
-        drawText(g, tr(L"没有找到匹配的设置项", L"No matching settings"), RectF(view.X, listTop + 60, view.Width, 30),
-                 font(13, false), scheme_.onSurfaceVariant, TextAlign::Center);
-        drawText(g, tr(L"试试其它关键词，或清空搜索框", L"Try another keyword or clear the search"),
-                 RectF(view.X, listTop + 92, view.Width, 24), font(12, false), scheme_.onSurfaceVariant,
-                 TextAlign::Center);
-        maxScroll_ = 0;
-        scroll_ = 0;
-    } else {
-        contentEnd = drawY + scroll_ - 16;
-        maxScroll_ = std::max(0.0f, contentEnd - view.GetBottom());
-        if (scroll_ > maxScroll_) scroll_ = maxScroll_;
-    }
+    contentEnd = drawY + scroll_ - 16;
+    maxScroll_ = std::max(0.0f, contentEnd - view.GetBottom());
+    if (scroll_ > maxScroll_) scroll_ = maxScroll_;
 
     // ---- bottom action bar
     const float barH = 84;
