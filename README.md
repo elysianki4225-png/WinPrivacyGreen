@@ -8,6 +8,16 @@
 
 ![应用图标](assets/icon.png)
 
+![概览](docs/screenshots/01-overview.png)
+
+| 广告与隐私 | 设置 |
+| --- | --- |
+| ![广告与隐私](docs/screenshots/02-items.png) | ![设置](docs/screenshots/04-settings.png) |
+
+| 暗色主题 | 关于 |
+| --- | --- |
+| ![暗色主题](docs/screenshots/06-overview-dark.png) | ![关于](docs/screenshots/07-about-dark.png) |
+
 ---
 
 ## 目录

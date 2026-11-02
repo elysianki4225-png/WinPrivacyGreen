@@ -501,15 +501,17 @@ void App::drawAbout(Graphics& g, const RectF& view) {
                 L"每一项都可以单独调整，修改前可以记录原值，随时恢复。",
                 L"A small tool that does one job: switching off Windows ads, suggestions, activity history and "
                 L"diagnostics.\nEvery switch is optional, and changes can be reverted at any time."),
-             RectF(view.X, y + 78, leftW, 56), font(12, false), scheme_.onSurfaceVariant, TextAlign::Left, true);
+             RectF(view.X, y + 86, leftW, 58), font(12, false), scheme_.onSurfaceVariant, TextAlign::Left, true);
 
     // ---- project link
-    RectF linkCard(view.X, y + 146, leftW, 88);
+    RectF linkCard(view.X, y + 158, leftW, 96);
     cardBg(g, linkCard, scheme_);
     drawText(g, tr(L"项目地址", L"Project home"), RectF(linkCard.X + 18, linkCard.Y + 14, leftW - 36, 20),
              font(11, false), scheme_.onSurfaceVariant);
-    drawText(g, kProjectUrl, RectF(linkCard.X + 18, linkCard.Y + 38, leftW - 36, 22), font(12, false), scheme_.primary);
-    drawText(g, tr(L"点击在浏览器中打开", L"Opens in your browser"), RectF(linkCard.X + 18, linkCard.Y + 60, leftW - 36, 18),
+    // The full address wraps onto a second line instead of being ellipsized.
+    drawText(g, kProjectUrl, RectF(linkCard.X + 18, linkCard.Y + 36, leftW - 36, 32), font(12, false), scheme_.primary,
+             TextAlign::Left, true, false);
+    drawText(g, tr(L"点击在浏览器中打开", L"Opens in your browser"), RectF(linkCard.X + 18, linkCard.Y + 70, leftW - 36, 18),
              font(11, false), scheme_.onSurfaceVariant);
     addHotspot(linkCard, A_OpenRepo);
 
@@ -544,14 +546,14 @@ void App::drawAbout(Graphics& g, const RectF& view) {
     }
 
     // ---- note
-    RectF note(rightX, info.GetBottom() + 16, rightW, 88);
+    RectF note(rightX, info.GetBottom() + 16, rightW, 104);
     cardBg(g, note, scheme_);
     drawText(g,
              tr(L"完全离线运行，不收集也不上传任何数据。只修改本机与广告、搜索、活动记录、诊断相关的注册表值，"
                 L"不写启动项、不装服务、不改系统文件。",
                 L"Runs fully offline, collects and uploads nothing. It only writes the local registry values behind ads, "
                 L"search, activity history and diagnostics - no services, no startup entries, no system files."),
-             RectF(note.X + 22, note.Y + 14, rightW - 44, 62), font(11, false), scheme_.onSurfaceVariant, TextAlign::Left,
+             RectF(note.X + 22, note.Y + 14, rightW - 44, 78), font(11, false), scheme_.onSurfaceVariant, TextAlign::Left,
              true);
 }
 
