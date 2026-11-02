@@ -30,7 +30,15 @@ jobs:
 
       - name: Launch, click and capture
         shell: pwsh
-        run: ./tools/capture.ps1 -Exe build/Release/WinPrivacyGreen.exe
+        run: |
+          try {
+            ./tools/capture.ps1 -Exe build/Release/WinPrivacyGreen.exe 6>&1 | Tee-Object -FilePath capture-log.txt
+          } catch {
+            Get-Content capture-log.txt -ErrorAction SilentlyContinue | Select-Object -Last 30 |
+              ForEach-Object { Write-Host "::error::$($_.ToString().Trim())" }
+            Write-Host "::error::$($_.Exception.Message)"
+            exit 1
+          }
 
       - name: Upload screenshots
         uses: actions/upload-artifact@v4
