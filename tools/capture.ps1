@@ -109,8 +109,19 @@ Write-Host "advertising id after: $after"
 Save-Shot $hwnd "$OutDir/03-items-toggled.png"
 if ($after -ne 0) { throw "toggling the first item did not write the registry (value=$after)" }
 
-# Reset the toggled value again so the settings screenshots start clean.
-Click-Dip $hwnd ($wDip - 76) 222
+# 3b. Block everything, then restore everything, checking the registry both times.
+# The bottom bar buttons sit at y=676 dip, right aligned.
+Click-Dip $hwnd ($wDip - 221) 676
+Save-Shot $hwnd "$OutDir/08-block-all.png"
+$allBlocked = (Get-ItemProperty -Path $regPath -Name Enabled -ErrorAction SilentlyContinue).Enabled
+Write-Host "[$Lang] advertising id after block all: $allBlocked"
+if ($allBlocked -ne 0) { throw "block all did not write the advertising id (value=$allBlocked)" }
+
+Click-Dip $hwnd ($wDip - 92) 676
+Save-Shot $hwnd "$OutDir/09-restore-all.png"
+$restored = (Get-ItemProperty -Path $regPath -Name Enabled -ErrorAction SilentlyContinue).Enabled
+Write-Host "[$Lang] advertising id after restore all: $restored"
+if ($restored -eq 0) { throw "restore all did not revert the advertising id (value=$restored)" }
 Start-Sleep -Seconds 4   # let the toast disappear
 
 # 4. Settings (light), then dark theme
