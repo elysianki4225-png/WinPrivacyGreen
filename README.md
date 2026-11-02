@@ -77,8 +77,15 @@
 | 渠道 | 地址 |
 | --- | --- |
 | GitHub Releases | [最新版本](https://github.com/elysianki4225-png/WinPrivacyGreen/releases/latest)（`WinPrivacyGreen.exe`，由 CI 用 MSVC 构建） |
-| 蓝奏云（备用） | <!-- TODO: 在这里粘贴蓝奏云分享链接 --> |
-| 蓝奏云提取码 | <!-- TODO: 在这里填写提取码 --> |
+| 蓝奏云（备用） | _（把蓝奏云分享链接粘贴到这里）_ |
+| 蓝奏云提取码 | _（把提取码填在这里）_ |
+
+> 上面两行就是给你留的位置：以后更新版本时，只要把新的蓝奏云链接和提取码替换进去即可，其它内容都不用动。
+
+<p align="center">
+  <img src="docs/screenshots/zh/08-block-all.png" width="49%" alt="全部屏蔽">
+  <img src="docs/screenshots/zh/09-restore-all.png" width="49%" alt="全部恢复">
+</p>
 
 下载 `WinPrivacyGreen.exe` 后直接双击运行即可，不需要安装。首次运行会在 `%APPDATA%\WinPrivacyGreen` 下创建配置与备份目录。
 
