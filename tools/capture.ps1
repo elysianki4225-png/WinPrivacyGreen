@@ -39,6 +39,14 @@ function Save-Shot([IntPtr]$hwnd, [string]$relativePath) {
     Write-Host "captured $relativePath ($w x $h, PrintWindow=$ok)"
 }
 
+function Get-WidthDip([IntPtr]$hwnd) {
+    $rect = New-Object WpgWin+RECT
+    [void][WpgWin]::GetWindowRect($hwnd, [ref]$rect)
+    $dpi = [WpgWin]::GetDpiForWindow($hwnd)
+    $scale = if ($dpi -gt 0) { $dpi / 96.0 } else { 1.0 }
+    return (($rect.Right - $rect.Left) / $scale)
+}
+
 function Click-Dip([IntPtr]$hwnd, [float]$x, [float]$y) {
     $dpi = [WpgWin]::GetDpiForWindow($hwnd)
     $scale = if ($dpi -gt 0) { $dpi / 96.0 } else { 1.0 }
@@ -79,8 +87,11 @@ Save-Shot $hwnd "$OutDir/01-overview.png"
 Click-Dip $hwnd 118 163
 Save-Shot $hwnd "$OutDir/02-items.png"
 
-# 3. Toggle the first row (advertising id) and verify the registry write
-Click-Dip $hwnd 1004 222
+# 3. Toggle the first row (advertising id) and verify the registry write.
+# The switch sits 76 dip from the right edge, the first row is centred on y=222.
+$wDip = Get-WidthDip $hwnd
+Write-Host "window width in dip: $wDip"
+Click-Dip $hwnd ($wDip - 76) 222
 Start-Sleep -Milliseconds 600
 $after = (Get-ItemProperty -Path $regPath -Name Enabled -ErrorAction SilentlyContinue).Enabled
 Write-Host "advertising id after: $after"
@@ -90,7 +101,7 @@ if ($after -ne 0) { throw "toggling the first item did not write the registry (v
 # 4. Settings (light), then dark theme
 Click-Dip $hwnd 118 213
 Save-Shot $hwnd "$OutDir/04-settings.png"
-Click-Dip $hwnd 980 163
+Click-Dip $hwnd ($wDip - 100) 163   # dark chip
 Save-Shot $hwnd "$OutDir/05-settings-dark.png"
 
 # 5. Overview in dark mode
