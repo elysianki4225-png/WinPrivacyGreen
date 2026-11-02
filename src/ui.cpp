@@ -174,7 +174,8 @@ void App::onDpiChanged() {
 
 // ---------------------------------------------------------------------------
 void App::applyTheme() {
-    dark_ = config_.theme == ThemeMode::Dark || (config_.theme == ThemeMode::Auto && systemUsesDarkForApps());
+    dark_ = config_.theme == ThemeMode::Dark ||
+            (config_.theme == ThemeMode::Auto && !forceLight_ && systemUsesDarkForApps());
     uint32_t seed = config_.seedColor;
     if (config_.dynamicColor && wallpaperOk_) seed = wallpaperSeedArgb_;
     seedArgb_ = seed;

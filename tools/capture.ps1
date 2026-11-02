@@ -68,7 +68,7 @@ New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 $configDir = Join-Path $env:APPDATA "WinPrivacyGreen"
 if (Test-Path $configDir) { Remove-Item -Recurse -Force $configDir }
 
-$proc = Start-Process -FilePath (Resolve-Path $Exe) -PassThru
+$proc = Start-Process -FilePath (Resolve-Path $Exe) -ArgumentList "--light" -PassThru
 Start-Sleep -Seconds 4
 $proc.Refresh()
 $hwnd = $proc.MainWindowHandle
@@ -97,6 +97,10 @@ $after = (Get-ItemProperty -Path $regPath -Name Enabled -ErrorAction SilentlyCon
 Write-Host "advertising id after: $after"
 Save-Shot $hwnd "$OutDir/03-items-toggled.png"
 if ($after -ne 0) { throw "toggling the first item did not write the registry (value=$after)" }
+
+# Reset the toggled value again so the settings screenshots start clean.
+Click-Dip $hwnd ($wDip - 76) 222
+Start-Sleep -Seconds 4   # let the toast disappear
 
 # 4. Settings (light), then dark theme
 Click-Dip $hwnd 118 213

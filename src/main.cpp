@@ -1,5 +1,6 @@
 // WinPrivacyGreen - entry point
 #include <windows.h>
+#include <cwchar>
 #include <objbase.h>
 #include <shellapi.h>
 
@@ -15,7 +16,17 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, LPWSTR, int) {
     }
     CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 
+    bool forceLight = false;
+    int argc = 0;
+    if (LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &argc)) {
+        for (int i = 1; i < argc; ++i) {
+            if (_wcsicmp(argv[i], L"--light") == 0 || _wcsicmp(argv[i], L"/light") == 0) forceLight = true;
+        }
+        LocalFree(argv);
+    }
+
     wpg::App app;
+    app.forceLightTheme(forceLight);
     if (!app.create(instance)) {
         MessageBoxW(nullptr, L"WinPrivacyGreen failed to start.", L"WinPrivacyGreen", MB_ICONERROR | MB_OK);
         CoUninitialize();

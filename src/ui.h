@@ -70,6 +70,10 @@ public:
 
     bool create(HINSTANCE instance);
     int run();
+    // Used by tools/capture.ps1 so demo screenshots do not depend on the
+    // runner's system theme. Only affects the light/dark default, not the
+    // in-app theme switcher.
+    void forceLightTheme(bool force) { forceLight_ = force; }
 
 private:
     static LRESULT CALLBACK staticProc(HWND, UINT, WPARAM, LPARAM);
@@ -138,6 +142,7 @@ private:
     float height_ = 0;  // DIP
     bool chinese_ = true;
     bool maxed_ = false;
+    bool forceLight_ = false;
 
     Config config_;
     Scheme scheme_{};
