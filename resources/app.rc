@@ -3,7 +3,7 @@
 
 1 ICON "icon.ico"
 
-1 RCDATA "app.manifest"
+1 24 "app.manifest"   // RT_MANIFEST
 
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION 1,0,0,0

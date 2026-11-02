@@ -17,9 +17,6 @@ $ROOT/src/color.cpp $ROOT/src/json.cpp $ROOT/src/sys.cpp $ROOT/src/items.cpp \
 $ROOT/src/backup.cpp $ROOT/src/config.cpp"
 
 # Icon + version info + manifest
-if [ ! -f "$ROOT/resources/icon.ico" ]; then
-  cp "$ROOT/assets/icon.ico" "$ROOT/resources/icon.ico"
-fi
 "$ZIG" rc /c 65001 /i "$ROOT/resources" "$ROOT/resources/app.rc" "$ROOT/build/app.res"
 
 "$ZIG" c++ -target x86_64-windows-gnu -std=c++17 -O2 -municode -mwindows -s \

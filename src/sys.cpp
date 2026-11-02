@@ -3,6 +3,7 @@
 #include <gdiplus.h>
 #include <shellapi.h>
 #include <shlobj.h>
+#include <winternl.h>
 
 #include <algorithm>
 #include <cmath>

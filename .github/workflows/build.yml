@@ -8,20 +8,18 @@ on:
 
 jobs:
   windows-exe:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Zig
-        uses: mlugg/setup-zig@v1
-        with:
-          version: 0.17.0
+      - name: Configure
+        run: cmake -B build -A x64
 
-      - name: Build WinPrivacyGreen.exe
-        run: ZIG=zig ./build/build.sh
+      - name: Build
+        run: cmake --build build --config Release
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: WinPrivacyGreen
-          path: build/WinPrivacyGreen.exe
+          path: build/Release/WinPrivacyGreen.exe

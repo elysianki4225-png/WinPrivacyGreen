@@ -183,7 +183,8 @@ void App::applyTheme() {
         // 20 is DWMWA_USE_IMMERSIVE_DARK_MODE on Windows 10 20H1+/11, 19 on 1809/1909.
         if (FAILED(DwmSetWindowAttribute(hwnd_, 20, &darkFrame, sizeof(darkFrame))))
             DwmSetWindowAttribute(hwnd_, 19, &darkFrame, sizeof(darkFrame));
-        DWORD border = scheme_.outlineVariant;
+        DWORD border = RGB(chanR(scheme_.outlineVariant), chanG(scheme_.outlineVariant),
+                           chanB(scheme_.outlineVariant));  // COLORREF is 0x00BBGGRR
         DwmSetWindowAttribute(hwnd_, 34 /*DWMWA_BORDER_COLOR*/, &border, sizeof(border));
         DWORD corner = 2;  // DWMWCP_ROUND
         DwmSetWindowAttribute(hwnd_, 33, &corner, sizeof(corner));

@@ -15,21 +15,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Zig
-        shell: pwsh
-        run: |
-          python -m pip install --quiet ziglang==0.17.0
-          $zig = python -c "import os, ziglang; print(os.path.join(os.path.dirname(ziglang.__file__), 'zig.exe'))"
-          Add-Content -Path $env:GITHUB_PATH -Value (Split-Path $zig)
-          & $zig version
+      - name: Configure
+        run: cmake -B build -A x64
 
       - name: Build
-        shell: bash
-        run: ZIG=zig ./build/build.sh
+        run: cmake --build build --config Release
 
       - name: Launch, click and capture
         shell: pwsh
-        run: ./tools/capture.ps1
+        run: ./tools/capture.ps1 -Exe build/Release/WinPrivacyGreen.exe
 
       - name: Upload screenshots
         uses: actions/upload-artifact@v4
