@@ -46,6 +46,12 @@ jobs:
           name: screenshots
           path: docs/screenshots
 
+      - name: Upload the tested executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: WinPrivacyGreen-msvc-x64
+          path: build/Release/WinPrivacyGreen.exe
+
       - name: Commit screenshots
         shell: bash
         run: |
