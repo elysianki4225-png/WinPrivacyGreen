@@ -54,6 +54,8 @@ jobs:
           path: build/Release/WinPrivacyGreen.exe
 
       - name: Commit screenshots
+        # Only the default branch owns the images; feature branches just upload them.
+        if: github.ref == 'refs/heads/main'
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
