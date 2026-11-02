@@ -145,6 +145,8 @@ std::string utf8FromWide(const std::wstring& s) {
 }
 
 std::wstring hex(uint32_t v, int digits) {
+    if (digits < 1) digits = 1;
+    if (digits < 8) v &= (1u << (digits * 4)) - 1u;  // drop the alpha byte, e.g. 0xFF2E7D32 -> 2E7D32
     wchar_t buf[16];
     swprintf(buf, 16, L"%0*X", digits, v);
     return buf;

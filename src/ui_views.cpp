@@ -381,8 +381,10 @@ void App::drawSettings(Graphics& g, const RectF& view) {
     float sw = 30, swGap = 12;
     for (int i = 0; i < 6; ++i) {
         RectF dot(appearance.X + 24 + i * (sw + swGap), appearance.Y + 172, sw, sw);
-        uint32_t fillColor = seeds[i].wallpaper ? (wallpaperOk_ ? wallpaperSeedRgb_ : scheme_.surfaceVariant)
-                                                : seeds[i].color;
+        // Scheme colors already carry a 0xFF alpha byte; the plain seed constants do not.
+        uint32_t fillColor = seeds[i].wallpaper
+                                 ? (wallpaperOk_ ? wallpaperSeedRgb_ : scheme_.surfaceVariant)
+                                 : (0xFF000000u | (seeds[i].color & 0xFFFFFFu));
         bool selected = seeds[i].wallpaper ? config_.dynamicColor : (!config_.dynamicColor && config_.seedColor == seeds[i].color);
         if (selected) strokeRound(g, RectF(dot.X - 5, dot.Y - 5, sw + 10, sw + 10), (sw + 10) / 2, scheme_.onSurface, 2.0f);
         SolidBrush b(col(fillColor));
@@ -479,55 +481,77 @@ void App::drawSettings(Graphics& g, const RectF& view) {
 void App::drawAbout(Graphics& g, const RectF& view) {
     maxScroll_ = 0;
     float y = view.Y;
+    float colGap = 16;
+    float leftW = std::min(360.0f, view.Width * 0.42f);
+    float rightX = view.X + leftW + colGap;
+    float rightW = view.Width - leftW - colGap;
 
-    RectF logo(view.X, y + 4, 64, 64);
-    fillRound(g, logo, 20, scheme_.primaryContainer);
-    drawIcon(g, IconKind::Shield, RectF(logo.X + 14, logo.Y + 14, 36, 36), scheme_.onPrimaryContainer, 2.0f);
-    drawText(g, L"WinPrivacyGreen", RectF(view.X + 84, y + 4, view.Width - 84, 34), font(24, true), scheme_.onSurface);
-    drawText(g, tr(L"版本 ", L"Version ") + std::wstring(kVersion) + tr(L"  ·  MIT 许可证  ·  开源", L"  ·  MIT license  ·  open source"),
-             RectF(view.X + 84, y + 40, view.Width - 84, 20), font(12, false), scheme_.onSurfaceVariant);
+    // ---- identity
+    RectF logo(view.X, y + 2, 60, 60);
+    fillRound(g, logo, 18, scheme_.primaryContainer);
+    drawIcon(g, IconKind::Shield, RectF(logo.X + 13, logo.Y + 13, 34, 34), scheme_.onPrimaryContainer, 2.0f);
+    drawText(g, L"WinPrivacyGreen", RectF(view.X + 76, y, leftW - 76, 32), font(21, true), scheme_.onSurface);
+    drawText(g, tr(L"版本 ", L"Version ") + std::wstring(kVersion),
+             RectF(view.X + 76, y + 32, leftW - 76, 20), font(12, false), scheme_.onSurfaceVariant);
+    drawText(g, L"MIT License · Open source", RectF(view.X + 76, y + 50, leftW - 76, 18), font(11, false),
+             scheme_.onSurfaceVariant);
 
     drawText(g,
-             tr(L"一个只做一件事的小工具：把 Windows 里的广告、推荐、活动记录与诊断数据关掉。全部开关都可以单独调整，修改前自动记录原值，随时可以恢复。",
-                L"A small tool that does one job: switching off Windows ads, suggestions, activity history and diagnostics. Every switch is optional, original values are recorded, and everything can be reverted."),
-             RectF(view.X, y + 84, view.Width - 40, 48), font(13, false), scheme_.onSurfaceVariant, TextAlign::Left, true);
+             tr(L"一个只做一件事的小工具：把 Windows 里的广告、推荐、活动记录与诊断数据关掉。"
+                L"每一项都可以单独调整，修改前可以记录原值，随时恢复。",
+                L"A small tool that does one job: switching off Windows ads, suggestions, activity history and "
+                L"diagnostics.\nEvery switch is optional, and changes can be reverted at any time."),
+             RectF(view.X, y + 78, leftW, 56), font(12, false), scheme_.onSurfaceVariant, TextAlign::Left, true);
 
-    RectF info(view.X, y + 146, view.Width, 158);
+    // ---- project link
+    RectF linkCard(view.X, y + 146, leftW, 88);
+    cardBg(g, linkCard, scheme_);
+    drawText(g, tr(L"项目地址", L"Project home"), RectF(linkCard.X + 18, linkCard.Y + 14, leftW - 36, 20),
+             font(11, false), scheme_.onSurfaceVariant);
+    drawText(g, kProjectUrl, RectF(linkCard.X + 18, linkCard.Y + 38, leftW - 36, 22), font(12, false), scheme_.primary);
+    drawText(g, tr(L"点击在浏览器中打开", L"Opens in your browser"), RectF(linkCard.X + 18, linkCard.Y + 60, leftW - 36, 18),
+             font(11, false), scheme_.onSurfaceVariant);
+    addHotspot(linkCard, A_OpenRepo);
+
+    // ---- environment table
+    RectF info(rightX, y, rightW, 234);
     cardBg(g, info, scheme_);
-    const wchar_t* keys[5] = {tr(L"系统", L"System"), tr(L"主题", L"Theme"), tr(L"取色", L"Color"),
-                              tr(L"备份", L"Backup"), tr(L"权限", L"Rights")};
-    std::wstring themeValue = config_.theme == ThemeMode::Auto
-                                  ? tr(L"跟随系统", L"Follow system")
-                                  : (config_.theme == ThemeMode::Light ? tr(L"亮色", L"Light") : tr(L"暗色", L"Dark"));
-    themeValue += dark_ ? tr(L"（当前暗色）", L" (dark now)") : tr(L"（当前亮色）", L" (light now)");
+    drawText(g, tr(L"本机信息", L"This machine"), RectF(info.X + 22, info.Y + 16, rightW - 44, 22), font(14, true),
+             scheme_.onSurface);
+    std::wstring themeValue =
+        config_.theme == ThemeMode::Auto
+            ? tr(L"跟随系统（当前", L"System (now ") + std::wstring(dark_ ? tr(L"暗色", L"dark") : tr(L"亮色", L"light")) + L")"
+            : (config_.theme == ThemeMode::Light ? tr(L"亮色", L"Light") : tr(L"暗色", L"Dark"));
     std::wstring colorValue = config_.dynamicColor
                                   ? (wallpaperOk_ ? tr(L"壁纸 #", L"Wallpaper #") + hex(wallpaperSeedRgb_, 6)
-                                                  : tr(L"品牌绿（未取到壁纸）", L"Brand green (no wallpaper)"))
+                                                  : tr(L"品牌绿（未找到壁纸）", L"Brand green (no wallpaper)"))
                                   : tr(L"自定义 #", L"Custom #") + hex(config_.seedColor, 6);
     std::wstring backupValue = std::wstring(config_.backup ? tr(L"已开启", L"On") : tr(L"已关闭", L"Off")) + L" · " +
                                std::to_wstring(backups_.snapshotCount()) + tr(L" 份备份", L" files");
-    std::wstring rightsValue = isAdmin() ? tr(L"管理员", L"Administrator") : tr(L"标准用户", L"Standard user");
-    std::wstring values[5] = {windowsVersionName() + L"  (build " + std::to_wstring(windowsBuild()) + L")",
-                              themeValue, colorValue, backupValue, rightsValue};
+    const wchar_t* keys[5] = {tr(L"系统", L"System"), tr(L"主题", L"Theme"), tr(L"取色", L"Color"),
+                              tr(L"备份", L"Backup"), tr(L"权限", L"Rights")};
+    std::wstring values[5] = {windowsVersionName() + L"  (build " + std::to_wstring(windowsBuild()) + L")", themeValue,
+                              colorValue, backupValue, isAdmin() ? tr(L"管理员", L"Administrator") : tr(L"标准用户", L"Standard user")};
     for (int i = 0; i < 5; ++i) {
-        float rowY = info.Y + 16 + i * 28;
-        drawText(g, keys[i], RectF(info.X + 22, rowY, 120, 22), font(12, false), scheme_.onSurfaceVariant);
-        drawText(g, values[i], RectF(info.X + 140, rowY, info.Width - 162, 22), font(12, false), scheme_.onSurface,
+        float rowY = info.Y + 50 + i * 33;
+        if (i > 0) {
+            SolidBrush line(col(blendArgb(scheme_.surfaceContainerLow, scheme_.outlineVariant, 0.5f)));
+            g.FillRectangle(&line, RectF(info.X + 22, rowY - 8, rightW - 44, 1.0f));
+        }
+        drawText(g, keys[i], RectF(info.X + 22, rowY, 90, 24), font(12, false), scheme_.onSurfaceVariant);
+        drawText(g, values[i], RectF(info.X + 112, rowY, rightW - 134, 24), font(12, false), scheme_.onSurface,
                  TextAlign::Right);
     }
 
-    RectF linkCard(view.X, y + 320, view.Width, 76);
-    cardBg(g, linkCard, scheme_);
-    drawText(g, tr(L"项目地址", L"Project home"), RectF(linkCard.X + 22, linkCard.Y + 14, 200, 20), font(12, false),
-             scheme_.onSurfaceVariant);
-    drawText(g, kProjectUrl, RectF(linkCard.X + 22, linkCard.Y + 38, linkCard.Width - 44, 24), font(14, false),
-             scheme_.primary);
-    addHotspot(linkCard, A_OpenRepo);
-
+    // ---- note
+    RectF note(rightX, info.GetBottom() + 16, rightW, 88);
+    cardBg(g, note, scheme_);
     drawText(g,
-             tr(L"本程序完全离线运行，不收集、不上传任何数据；只修改当前用户与系统策略下与本机隐私相关的注册表值。",
-                L"This program runs fully offline and never collects or uploads data. It only writes the local registry values that control ads and privacy."),
-             RectF(view.X, y + 410, view.Width - 40, 40), font(11, false), scheme_.onSurfaceVariant, TextAlign::Left,
+             tr(L"完全离线运行，不收集也不上传任何数据。只修改本机与广告、搜索、活动记录、诊断相关的注册表值，"
+                L"不写启动项、不装服务、不改系统文件。",
+                L"Runs fully offline, collects and uploads nothing. It only writes the local registry values behind ads, "
+                L"search, activity history and diagnostics - no services, no startup entries, no system files."),
+             RectF(note.X + 22, note.Y + 14, rightW - 44, 62), font(11, false), scheme_.onSurfaceVariant, TextAlign::Left,
              true);
 }
 
