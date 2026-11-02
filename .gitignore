@@ -1,0 +1,13 @@
+# build output
+build/*
+!build/build.sh
+resources/icon.ico
+resources/app.res
+
+# scratch
+*.o
+*.obj
+*.exe
+*.pdb
+*.ilk
+tmp/
