@@ -37,14 +37,37 @@ std::wstring joinPath(const std::wstring& a, const std::wstring& b) {
     return out;
 }
 
+static bool dirWritable(const std::wstring& dir) {
+    std::wstring probe = joinPath(dir, L".wpg-write-test");
+    HANDLE h = CreateFileW(probe.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS,
+                           FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE, nullptr);
+    if (h == INVALID_HANDLE_VALUE) return false;
+    CloseHandle(h);
+    return true;
+}
+
+// "Green" software keeps its data next to the executable whenever that folder
+// is writable; Program Files style locations fall back to %APPDATA%.
 std::wstring appDataDir() {
+    static std::wstring cached;
+    if (!cached.empty()) return cached;
+
+    std::wstring exe = exeDir();
+    if (!exe.empty()) {
+        std::wstring portable = joinPath(exe, L"WinPrivacyGreen.data");
+        if (ensureDir(portable) && dirWritable(portable)) {
+            cached = portable;
+            return cached;
+        }
+    }
     std::wstring base = knownFolder(FOLDERID_RoamingAppData);
     if (base.empty()) {
         wchar_t buf[MAX_PATH * 2] = {};
         DWORD n = GetEnvironmentVariableW(L"APPDATA", buf, MAX_PATH * 2);
         if (n > 0 && n < MAX_PATH * 2) base = buf;
     }
-    return joinPath(base, L"WinPrivacyGreen");
+    cached = joinPath(base, L"WinPrivacyGreen");
+    return cached;
 }
 
 std::wstring backupsDir() { return joinPath(appDataDir(), L"backups"); }

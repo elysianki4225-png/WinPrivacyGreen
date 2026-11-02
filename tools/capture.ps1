@@ -68,7 +68,7 @@ New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 
 # Fresh configuration so the screenshots show the default state, in a fixed
 # language so the images do not depend on the runner's locale.
-$configDir = Join-Path $env:APPDATA "WinPrivacyGreen"
+$configDir = Join-Path (Split-Path (Resolve-Path $Exe)) "WinPrivacyGreen.data"
 if (Test-Path $configDir) { Remove-Item -Recurse -Force $configDir }
 New-Item -ItemType Directory -Force -Path $configDir | Out-Null
 @{

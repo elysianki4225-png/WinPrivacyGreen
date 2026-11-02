@@ -3,6 +3,9 @@ build/*
 !build/build.sh
 resources/app.res
 
+# app data written next to the executable in portable mode
+WinPrivacyGreen.data/
+
 # scratch
 *.o
 *.obj
