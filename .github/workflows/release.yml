@@ -1,0 +1,31 @@
+name: release
+
+# Builds the signed-in-CI Windows binary with MSVC and attaches it to the
+# GitHub release (replacing any placeholder asset uploaded by hand).
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+
+jobs:
+  attach:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -B build -A x64
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Attach WinPrivacyGreen.exe
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.event.release.tag_name || 'v1.0.0' }}
+        run: |
+          gh release upload $env:TAG build/Release/WinPrivacyGreen.exe --clobber
+          gh release view $env:TAG --json assets --jq '.assets[] | "\(.name) \(.size) bytes"'
