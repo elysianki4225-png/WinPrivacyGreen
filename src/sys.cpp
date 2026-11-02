@@ -353,15 +353,15 @@ std::wstring currentWallpaperPath() {
 
 bool sampleImageColor(const std::wstring& path, uint32_t& argbOut, Oklch& seedOut) {
     if (path.empty() || !fileExists(path)) return false;
-    Bitmap source(path.c_str(), FALSE);
+    Bitmap source((const WCHAR*)path.c_str(), FALSE);  // parens: avoid the most vexing parse
     if (source.GetLastStatus() != Ok) return false;
     UINT sw = source.GetWidth(), sh = source.GetHeight();
     if (sw < 2 || sh < 2) return false;
 
     const int kGrid = 56;
-    Bitmap small(kGrid, kGrid, PixelFormat32bppARGB);
+    Bitmap thumb(kGrid, kGrid, PixelFormat32bppARGB);
     {
-        Graphics g(&small);
+        Graphics g(&thumb);
         g.SetInterpolationMode(InterpolationModeHighQualityBicubic);
         g.SetPixelOffsetMode(PixelOffsetModeHighQuality);
         g.DrawImage(&source, RectF(0, 0, (REAL)kGrid, (REAL)kGrid), 0, 0, (REAL)sw, (REAL)sh, UnitPixel);
@@ -369,7 +369,7 @@ bool sampleImageColor(const std::wstring& path, uint32_t& argbOut, Oklch& seedOu
 
     BitmapData data{};
     Rect rect(0, 0, kGrid, kGrid);
-    if (small.LockBits(&rect, ImageLockModeRead, PixelFormat32bppARGB, &data) != Ok) return false;
+    if (thumb.LockBits(&rect, ImageLockModeRead, PixelFormat32bppARGB, &data) != Ok) return false;
 
     const int kBuckets = 24;
     double weightSum[kBuckets] = {};
@@ -395,7 +395,7 @@ bool sampleImageColor(const std::wstring& path, uint32_t& argbOut, Oklch& seedOu
             accL[bucket] += c.L * w;
         }
     }
-    small.UnlockBits(&data);
+    thumb.UnlockBits(&data);
 
     int best = -1;
     for (int i = 0; i < kBuckets; ++i)

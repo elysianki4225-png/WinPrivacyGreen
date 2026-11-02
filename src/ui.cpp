@@ -163,11 +163,11 @@ void App::onDpiChanged() {
         iconLarge_ = icon;
         SendMessageW(hwnd_, WM_SETICON, ICON_BIG, (LPARAM)iconLarge_);
     }
-    HICON small = (HICON)LoadImageW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(1), IMAGE_ICON,
-                                    GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), 0);
-    if (small) {
+    HICON smallIcon = static_cast<HICON>(LoadImageW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(1), IMAGE_ICON,
+                                                  GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), 0));
+    if (smallIcon) {
         if (iconSmall_) DestroyIcon(iconSmall_);
-        iconSmall_ = small;
+        iconSmall_ = smallIcon;
         SendMessageW(hwnd_, WM_SETICON, ICON_SMALL, (LPARAM)iconSmall_);
     }
 }
