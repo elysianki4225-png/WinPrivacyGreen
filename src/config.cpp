@@ -1,3 +1,6 @@
+#include <cstdlib>
+#include <cwchar>
+
 #include "json.h"
 #include "sys.h"
 #include "ui.h"

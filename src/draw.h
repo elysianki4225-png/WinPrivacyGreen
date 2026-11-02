@@ -1,6 +1,7 @@
 // Drawing helpers shared by the view code.
 #pragma once
 #include <windows.h>
+#include <objidl.h>  // IUnknown, needed by GDI+ on MSVC
 #include <gdiplus.h>
 
 #include <string>

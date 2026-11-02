@@ -1,5 +1,6 @@
 #include "sys.h"
 
+#include <objidl.h>
 #include <gdiplus.h>
 #include <shellapi.h>
 #include <shlobj.h>
@@ -8,6 +9,8 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <cwchar>
+#include <string.h>
 
 #include "json.h"
 

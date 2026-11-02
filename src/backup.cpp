@@ -1,6 +1,8 @@
 #include "backup.h"
 
 #include <algorithm>
+#include <cwchar>
+#include <string.h>
 
 #include "items.h"
 #include "json.h"

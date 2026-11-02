@@ -1,6 +1,7 @@
 // WinPrivacyGreen - Material Design 3 settings window.
 #pragma once
 #include <windows.h>
+#include <objidl.h>  // IUnknown, needed by GDI+ on MSVC
 #include <gdiplus.h>
 
 #include <map>

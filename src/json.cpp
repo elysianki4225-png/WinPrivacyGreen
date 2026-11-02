@@ -1,6 +1,7 @@
 #include "json.h"
 
 #include <cmath>
+#include <cwchar>
 #include <cstdio>
 #include <cstdlib>
 

@@ -1,6 +1,7 @@
 #include "items.h"
 
 #include <algorithm>
+#include <string.h>
 
 namespace wpg {
 

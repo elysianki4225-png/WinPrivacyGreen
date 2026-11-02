@@ -2,10 +2,12 @@
 #include <windowsx.h>
 #include <dwmapi.h>
 #include <shellapi.h>
+#include <objidl.h>
 #include <gdiplus.h>
 
 #include <algorithm>
 #include <cmath>
+#include <cwchar>
 
 #include "backup.h"
 #include "draw.h"
