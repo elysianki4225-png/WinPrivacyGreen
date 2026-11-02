@@ -32,7 +32,8 @@ jobs:
         shell: pwsh
         run: |
           try {
-            ./tools/capture.ps1 -Exe build/Release/WinPrivacyGreen.exe 6>&1 | Tee-Object -FilePath capture-log.txt
+            ./tools/capture.ps1 -Exe build/Release/WinPrivacyGreen.exe -Lang zh 6>&1 | Tee-Object -FilePath capture-log.txt
+            ./tools/capture.ps1 -Exe build/Release/WinPrivacyGreen.exe -Lang en 6>&1 | Tee-Object -Append -FilePath capture-log.txt
           } catch {
             Get-Content capture-log.txt -ErrorAction SilentlyContinue | Select-Object -Last 30 |
               ForEach-Object { Write-Host "::error::$($_.ToString().Trim())" }

@@ -2,8 +2,10 @@
 # Used by .github/workflows/verify.yml on a Windows runner; harmless locally.
 param(
     [string]$Exe = "build/Release/WinPrivacyGreen.exe",
-    [string]$OutDir = "docs/screenshots"
+    [ValidateSet("zh", "en")][string]$Lang = "en",
+    [string]$OutDir = ""
 )
+if (-not $OutDir) { $OutDir = "docs/screenshots/$Lang" }
 
 $ErrorActionPreference = "Stop"
 Add-Type -AssemblyName System.Drawing
@@ -64,9 +66,18 @@ function Click-Dip([IntPtr]$hwnd, [float]$x, [float]$y) {
 
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 
-# Fresh configuration so the screenshots show the default state.
+# Fresh configuration so the screenshots show the default state, in a fixed
+# language so the images do not depend on the runner's locale.
 $configDir = Join-Path $env:APPDATA "WinPrivacyGreen"
 if (Test-Path $configDir) { Remove-Item -Recurse -Force $configDir }
+New-Item -ItemType Directory -Force -Path $configDir | Out-Null
+@{
+    theme = "auto"
+    dynamicColor = $true
+    seedColor = "#2E7D32"
+    backup = $true
+    lang = $Lang
+} | ConvertTo-Json | Set-Content -Path (Join-Path $configDir "config.json") -Encoding utf8
 
 $proc = Start-Process -FilePath (Resolve-Path $Exe) -ArgumentList "--light" -PassThru
 Start-Sleep -Seconds 4
@@ -78,7 +89,7 @@ Start-Sleep -Milliseconds 800
 
 $regPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo"
 $before = (Get-ItemProperty -Path $regPath -Name Enabled -ErrorAction SilentlyContinue).Enabled
-Write-Host "advertising id before: $before"
+Write-Host "[$Lang] advertising id before: $before"
 
 # 1. Overview (light)
 Save-Shot $hwnd "$OutDir/01-overview.png"
