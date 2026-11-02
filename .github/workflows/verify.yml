@@ -19,7 +19,14 @@ jobs:
         run: cmake -B build -A x64
 
       - name: Build
-        run: cmake --build build --config Release
+        shell: pwsh
+        run: |
+          cmake --build build --config Release 2>&1 | Tee-Object -FilePath build-log.txt
+          if ($LASTEXITCODE -ne 0) {
+            Get-Content build-log.txt | Select-String -Pattern "error" | Select-Object -First 20 |
+              ForEach-Object { Write-Host "::error file=src::$($_.Line.Trim())" }
+            exit 1
+          }
 
       - name: Launch, click and capture
         shell: pwsh
