@@ -8,15 +8,17 @@
 
 ![应用图标](assets/icon.png)
 
-![概览](docs/screenshots/01-overview.png)
+![概览](docs/screenshots/zh/01-overview.png)
 
 | 广告与隐私 | 设置 |
 | --- | --- |
-| ![广告与隐私](docs/screenshots/02-items.png) | ![设置](docs/screenshots/04-settings.png) |
+| ![广告与隐私](docs/screenshots/zh/02-items.png) | ![设置](docs/screenshots/zh/04-settings.png) |
 
 | 暗色主题 | 关于 |
 | --- | --- |
-| ![暗色主题](docs/screenshots/06-overview-dark.png) | ![关于](docs/screenshots/07-about-dark.png) |
+| ![暗色主题](docs/screenshots/zh/06-overview-dark.png) | ![关于](docs/screenshots/zh/07-about-dark.png) |
+
+<sub>截图由 CI 在 Windows 11 运行器上实机点击生成（英文界面见 [docs/screenshots/en](docs/screenshots/en)）。</sub>
 
 ---
 
@@ -74,9 +76,16 @@
 
 | 渠道 | 地址 |
 | --- | --- |
-| GitHub Releases | [最新版本](https://github.com/elysianki4225-png/WinPrivacyGreen/releases/latest) |
-| 蓝奏云（备用） | <!-- TODO: 在这里粘贴蓝奏云分享链接 --> |
-| 蓝奏云提取码 | <!-- TODO: 在这里填写提取码 --> |
+| GitHub Releases | [最新版本](https://github.com/elysianki4225-png/WinPrivacyGreen/releases/latest)（`WinPrivacyGreen.exe`，由 CI 用 MSVC 构建） |
+| 蓝奏云（备用） | _（把蓝奏云分享链接粘贴到这里）_ |
+| 蓝奏云提取码 | _（把提取码填在这里）_ |
+
+> 上面两行就是给你留的位置：以后更新版本时，只要把新的蓝奏云链接和提取码替换进去即可，其它内容都不用动。
+
+<p align="center">
+  <img src="docs/screenshots/zh/08-block-all.png" width="49%" alt="全部屏蔽">
+  <img src="docs/screenshots/zh/09-restore-all.png" width="49%" alt="全部恢复">
+</p>
 
 下载 `WinPrivacyGreen.exe` 后直接双击运行即可，不需要安装。首次运行会在 `%APPDATA%\WinPrivacyGreen` 下创建配置与备份目录。
 
@@ -94,7 +103,7 @@
 
 ## 设置项清单
 
-共 21 项，分为四组。表内「需管理员」表示该项写入 `HKLM`，需要以管理员身份运行。
+共 22 项，分为四组。表内「需管理员」表示该项写入 `HKLM`，需要以管理员身份运行。
 
 ### 广告与推荐
 

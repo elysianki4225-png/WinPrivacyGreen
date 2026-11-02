@@ -575,7 +575,8 @@ void App::drawToast(Graphics& g, float w, float h) {
     float bw = std::min(w - 120, textWid + 48);
     float bh = 46;
     float bx = (w - bw) / 2;
-    float by = h - 118;
+    // Sits above the bottom action bar so it never covers the buttons.
+    float by = h - 196;
     uint32_t bg = toastKind_ == 1 ? scheme_.primaryContainer
                                   : (toastKind_ == 2 ? scheme_.errorContainer : scheme_.inverseSurface);
     uint32_t fg = toastKind_ == 1 ? scheme_.onPrimaryContainer
