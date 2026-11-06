@@ -1,6 +1,6 @@
 name: release
 
-# Publish the right independently built executable for each product's tag.
+# WinPrivacyGreen releases. Sandboxie helper tags are built and uploaded by build.yml.
 on:
   release:
     types: [published]
@@ -25,35 +25,4 @@ jobs:
           TAG: ${{ github.event.release.tag_name || 'v1.0.0' }}
         run: |
           gh release upload $env:TAG build/Release/WinPrivacyGreen.exe --clobber
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-
-  attach-sandboxie:
-    if: github.event_name == 'release' && startsWith(github.event.release.tag_name, 'sandboxie-recovery-v')
-    runs-on: windows-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - name: Configure
-        run: cmake -B build -A x64
-      - name: Build
-        run: cmake --build build --config Release
-      - name: Test INI editing
-        run: ctest --test-dir build -C Release --output-on-failure
-      - name: Test Windows executable
-        shell: pwsh
-        run: >-
-          ./sandboxie-recovery/tests/integration.ps1
-          -Exe build/sandboxie-recovery/Release/SandboxieRecoverySwitch.exe
-          -FakeManager build/sandboxie-recovery/Release/SandboxieRecoveryFakeManager.exe
-      - name: Attach executable and SHA-256
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ github.event.release.tag_name }}
-        run: |
-          $exe = 'build/sandboxie-recovery/Release/SandboxieRecoverySwitch.exe'
-          $hash = (Get-FileHash $exe -Algorithm SHA256).Hash.ToLowerInvariant()
-          "$hash  SandboxieRecoverySwitch.exe" | Set-Content -Encoding ascii 'build/SandboxieRecoverySwitch.sha256.txt'
-          gh release upload $env:TAG $exe build/SandboxieRecoverySwitch.sha256.txt --clobber
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
