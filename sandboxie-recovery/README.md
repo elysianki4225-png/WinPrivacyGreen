@@ -4,7 +4,7 @@
 
 ## 下载和使用
 
-1. 在 [Sandboxie 文件恢复开关发布页](https://github.com/elysianki4225-png/WinPrivacyGreen/releases/tag/sandboxie-recovery-v1.0.0) 下载 `SandboxieRecoverySwitch.exe`。这是单独的工具，不是 Sandboxie 安装包；请先安装并启动过 Sandboxie Plus。
+1. 在 [Sandboxie 文件恢复开关发布页](https://github.com/elysianki4225-png/WinPrivacyGreen/releases/tag/sandboxie-recovery-v1.0.1) 下载 `SandboxieRecoverySwitch.exe`。这是单独的工具，不是 Sandboxie 安装包；请先安装并启动过 Sandboxie Plus。
 2. **先保存沙盒内的工作**，再从系统托盘的 Sandboxie 图标菜单选择「退出」；仅点窗口右上角可能只是最小化到托盘。如果 Sandboxie 配置了「退出时结束沙盒进程」，退出管理器也可能结束这些进程。
 3. 在**沙盒外**双击工具。通常会自动找到 `SandMan.exe` 和实际配置；如果没有找到，点击「选择程序」选择 Sandboxie Plus 安装目录或便携目录里的 `SandMan.exe`，检查界面显示的配置路径。
 4. 点击「一键关闭文件恢复」，然后重新启动 Sandboxie Plus。工具不会强制终止进程；若管理器仍在运行或配置不可写，会停止并提示，不会声称成功。配置位于受保护目录时，可能需要右键「以管理员身份运行」。若使用**另一个管理员账户**提权，用户配置目录可能不同，请核对界面显示的路径。
@@ -62,5 +62,7 @@ INI 编辑核心也可在 Linux 上直接测试：
 c++ -std=c++17 -I sandboxie-recovery/src sandboxie-recovery/src/ini.cpp \
   sandboxie-recovery/tests/ini_tests.cpp -o /tmp/recovery-tests && /tmp/recovery-tests
 ```
+
+发布维护：更新 `VERSION`，先创建指向待发布分支的同版本草稿 Release，再推送该分支；`build.yml` 会在 Windows 测试通过后把 exe 和校验文件附到该草稿。确认资产和提交后再发布草稿；不会覆盖已发布版本。
 
 本项目与 Sandboxie 官方无关联。实现依据：上游 [SandMan 菜单及配置](https://github.com/sandboxie-plus/Sandboxie/blob/v1.18.8/SandboxiePlus/SandMan/SandMan.cpp)、[恢复处理](https://github.com/sandboxie-plus/Sandboxie/blob/v1.18.8/SandboxiePlus/SandMan/SandManRecovery.cpp)和 [配置位置](https://github.com/sandboxie-plus/Sandboxie/blob/v1.18.8/SandboxiePlus/MiscHelpers/Common/Settings.cpp)。

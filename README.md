@@ -55,7 +55,7 @@
 
 另有一个**独立 exe**：一键关闭 Sandboxie Plus 的自动文件恢复提示，并支持备份与恢复原设置。请先退出 Sandboxie 管理器后使用；手动快速恢复仍可用。清空沙盒可能删除其中的文件，请先保存重要数据。
 
-- [下载 SandboxieRecoverySwitch.exe](https://github.com/elysianki4225-png/WinPrivacyGreen/releases/tag/sandboxie-recovery-v1.0.0)
+- [下载 SandboxieRecoverySwitch.exe](https://github.com/elysianki4225-png/WinPrivacyGreen/releases/tag/sandboxie-recovery-v1.0.1)
 - [使用说明、注意事项及源码](sandboxie-recovery/README.md)（仅支持 Plus，非 Classic）
 
 ## 动态取色与亮/暗主题

@@ -399,7 +399,8 @@ Outcome apply(const std::wstring& sandman, bool restoring) {
         if (result.view_preserved) message += L"\n\n检测到视图后来被更改，已保留当前视图。";
         return {0, message};
     }
-    std::wstring message = L"已关闭 Sandboxie Plus 的文件恢复提示。请重新启动 Sandboxie Plus 后使用。";
+    std::wstring message = L"已关闭 Sandboxie Plus 的文件恢复提示。请重新启动 Sandboxie Plus 后使用。"
+                           L"\n\n清空或自动删除沙盒可能删除其中的文件，请先另存重要文件。";
     if (result.view_changed) message += L"\n\n为使该选项生效，管理器视图已切换到“高级视图”；恢复按钮可还原。";
     message += L"\n\n原配置备份：\n" + backup;
     return {0, message};

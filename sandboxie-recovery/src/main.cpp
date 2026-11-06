@@ -155,10 +155,11 @@ LRESULT CALLBACK wnd_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
                 364, 345, 310, 50, kRestore, button_font);
         backup_text = control(L"STATIC", L"", 0, 34, 418, 640, 24, 0, small_font);
         control(L"STATIC", L"说明：只关闭自动恢复提示；手动快速恢复仍可使用。\r\n"
-                           L"如果原来是简洁/经典视图，会切换为高级视图以确保选项生效。\r\n"
-                           L"操作后请重新启动 Sandboxie Plus；切回其他视图可能使此选项失效。\r\n"
+                           L"清空或自动删除沙盒可能删除其中的文件，请先另存重要文件。\r\n"
+                           L"简洁/经典视图会切换为高级视图；切回后本选项可能失效。\r\n"
+                           L"操作后请重新启动 Sandboxie Plus。\r\n"
                            L"退出管理器前请保存工作：Sandboxie 可能配置为退出时结束沙盒进程。",
-                0, 34, 455, 640, 87, 0, small_font);
+                0, 34, 455, 640, 106, 0, small_font);
         SetTimer(hwnd, kRefreshTimer, 2000, nullptr);
         refresh();
         return 0;
@@ -260,7 +261,7 @@ int WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE, PWSTR, int show) {
     wc.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
     if (!RegisterClassExW(&wc)) return 1;
     const DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
-    RECT r{0, 0, px(708), px(560)};
+    RECT r{0, 0, px(708), px(580)};
     AdjustWindowRectEx(&r, style, FALSE, 0);
     const int width = r.right - r.left, height = r.bottom - r.top;
     HWND hwnd = CreateWindowExW(0, wc.lpszClassName, L"Sandboxie 文件恢复开关", style,

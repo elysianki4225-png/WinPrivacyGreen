@@ -58,8 +58,11 @@ jobs:
         id: draft
         shell: bash
         run: |
-          tag="sandboxie-recovery-v$(tr -d '\r\n' < sandboxie-recovery/VERSION)"
-          metadata=$(gh release view "$tag" --json isDraft,targetCommitish 2>/dev/null || true)
+          version=$(tr -d '\r\n' < sandboxie-recovery/VERSION)
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Invalid version: $version" >&2; exit 1; }
+          tag="sandboxie-recovery-v$version"
+          metadata=$(gh api --paginate "repos/$GH_REPO/releases?per_page=100" | \
+            jq -c --arg tag "$tag" '.[] | select(.tag_name == $tag) | {isDraft: .draft, targetCommitish: .target_commitish}')
           if [[ -z "$metadata" ]]; then
             echo "No matching release draft; nothing to upload."
             exit 0
