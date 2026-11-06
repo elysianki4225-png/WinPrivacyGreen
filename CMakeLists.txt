@@ -43,3 +43,7 @@ else()
 endif()
 
 install(TARGETS WinPrivacyGreen RUNTIME DESTINATION .)
+
+# Independent portable helper for Sandboxie Plus.
+include(CTest)
+add_subdirectory(sandboxie-recovery)

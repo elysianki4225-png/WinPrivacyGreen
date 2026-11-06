@@ -1,26 +1,23 @@
 name: release
 
-# Builds the signed-in-CI Windows binary with MSVC and attaches it to the
-# GitHub release (replacing any placeholder asset uploaded by hand).
+# WinPrivacyGreen releases. Sandboxie helper drafts are built and uploaded by build.yml.
 on:
   release:
-    types: [created]
+    types: [published]
   workflow_dispatch:
 
 jobs:
-  attach:
+  attach-winprivacy:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.release.tag_name, 'v')
     runs-on: windows-latest
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
-
       - name: Configure
         run: cmake -B build -A x64
-
       - name: Build
         run: cmake --build build --config Release
-
       - name: Attach WinPrivacyGreen.exe
         shell: pwsh
         env:
@@ -28,4 +25,4 @@ jobs:
           TAG: ${{ github.event.release.tag_name || 'v1.0.0' }}
         run: |
           gh release upload $env:TAG build/Release/WinPrivacyGreen.exe --clobber
-          gh release view $env:TAG --json assets --jq '.assets[] | "\(.name) \(.size) bytes"'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
