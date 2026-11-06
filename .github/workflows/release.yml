@@ -1,6 +1,6 @@
 name: release
 
-# WinPrivacyGreen releases. Sandboxie helper tags are built and uploaded by build.yml.
+# WinPrivacyGreen releases. Sandboxie helper drafts are built and uploaded by build.yml.
 on:
   release:
     types: [published]

@@ -3,7 +3,6 @@ name: build
 on:
   push:
     branches: [main, 'arena/**']
-    tags: ['sandboxie-recovery-v*']
   pull_request:
   workflow_dispatch:
 
@@ -41,25 +40,53 @@ jobs:
           name: SandboxieRecoverySwitch
           path: build/sandboxie-recovery/Release/SandboxieRecoverySwitch.exe
 
+
   release-sandboxie:
-    # Creating a release draft with a new sandboxie-recovery-v* tag triggers
-    # this job. Upload only after the actual Windows executable passes tests.
-    if: startsWith(github.ref, 'refs/tags/sandboxie-recovery-v')
+    # A draft whose target is the pushed branch receives the tested executable.
+    # Do not touch published releases or drafts targeting another branch.
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/')
     needs: windows-exe
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
     steps:
+      - uses: actions/checkout@v4
+      - name: Check for matching release draft
+        id: draft
+        shell: bash
+        run: |
+          tag="sandboxie-recovery-v$(tr -d '\r\n' < sandboxie-recovery/VERSION)"
+          metadata=$(gh release view "$tag" --json isDraft,targetCommitish 2>/dev/null || true)
+          if [[ -z "$metadata" ]]; then
+            echo "No matching release draft; nothing to upload."
+            exit 0
+          fi
+          draft=$(jq -r .isDraft <<< "$metadata")
+          target=$(jq -r .targetCommitish <<< "$metadata")
+          if [[ "$draft" != true || ( "$target" != "$GITHUB_REF_NAME" && "$target" != "$GITHUB_SHA" ) ]]; then
+            echo "Release is published or targets a different branch; skipping."
+            exit 0
+          fi
+          head=$(gh api "repos/$GH_REPO/git/ref/heads/$GITHUB_REF_NAME" --jq .object.sha)
+          if [[ "$head" != "$GITHUB_SHA" ]]; then
+            echo "A newer branch build will handle the draft."
+            exit 0
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "ready=true" >> "$GITHUB_OUTPUT"
       - uses: actions/download-artifact@v4
+        if: steps.draft.outputs.ready == 'true'
         with:
           name: SandboxieRecoverySwitch
           path: release-assets
-      - name: Attach tested executable and SHA-256 to release
+      - name: Attach tested executable and SHA-256 to draft
+        if: steps.draft.outputs.ready == 'true'
         shell: bash
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ github.ref_name }}
-          GH_REPO: ${{ github.repository }}
+          TAG: ${{ steps.draft.outputs.tag }}
         run: |
           cd release-assets
           sha256sum SandboxieRecoverySwitch.exe > SandboxieRecoverySwitch.sha256.txt
