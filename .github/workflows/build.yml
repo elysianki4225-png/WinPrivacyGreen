@@ -18,8 +18,24 @@ jobs:
       - name: Build
         run: cmake --build build --config Release
 
-      - name: Upload artifact
+      - name: Test INI editing
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Test Sandboxie helper on Windows
+        shell: pwsh
+        run: >-
+          ./sandboxie-recovery/tests/integration.ps1
+          -Exe build/sandboxie-recovery/Release/SandboxieRecoverySwitch.exe
+          -FakeManager build/sandboxie-recovery/Release/SandboxieRecoveryFakeManager.exe
+
+      - name: Upload WinPrivacyGreen artifact
         uses: actions/upload-artifact@v4
         with:
           name: WinPrivacyGreen
           path: build/Release/WinPrivacyGreen.exe
+
+      - name: Upload Sandboxie Recovery Switch artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SandboxieRecoverySwitch
+          path: build/sandboxie-recovery/Release/SandboxieRecoverySwitch.exe

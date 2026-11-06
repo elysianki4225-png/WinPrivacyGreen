@@ -25,6 +25,7 @@
 ## 目录
 
 - [功能](#功能)
+- [附加工具：Sandboxie Plus 文件恢复开关](#附加工具sandboxie-plus-文件恢复开关)
 - [动态取色与亮/暗主题](#动态取色与亮暗主题)
 - [支持的系统](#支持的系统)
 - [下载](#下载)
@@ -49,6 +50,13 @@
 - **一键批量**：`全部屏蔽` / `全部恢复`，同时保留逐项手动调整。
 - **备份可选**：可以在界面上直接打开或关闭备份；开启时，每一项第一次被修改前都会记录原值。
 - **零依赖 + 绿色**：单文件 exe，约 450 KB，不需要 .NET、不需要运行库、不写启动项；配置与备份就放在 exe 旁边，拷走即用。
+
+## 附加工具：Sandboxie Plus 文件恢复开关
+
+另有一个**独立 exe**：一键关闭 Sandboxie Plus 的自动文件恢复提示，并支持备份与恢复原设置。请先退出 Sandboxie 管理器后使用；手动快速恢复仍可用。清空沙盒可能删除其中的文件，请先保存重要数据。
+
+- [下载 SandboxieRecoverySwitch.exe](https://github.com/elysianki4225-png/WinPrivacyGreen/releases/tag/sandboxie-recovery-v1.0.0)
+- [使用说明、注意事项及源码](sandboxie-recovery/README.md)（仅支持 Plus，非 Classic）
 
 ## 动态取色与亮/暗主题
 
